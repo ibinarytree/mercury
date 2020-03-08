@@ -1,0 +1,87 @@
+syntax = "proto3";
+package mercury.core.question;
+option go_package="question";
+
+message CreateQuestionRequest {
+    string title = 1;        //标题
+    string content = 2;      //内容
+    int64 user_id = 3;       //用户id
+    repeated int64 topic_ids = 4;  //所属的话题id
+}
+
+message CreateQuestionResponse {
+    int64 question_id = 1; //问题id
+}
+
+message CreateAnswerRequest {
+    int64 question_id = 1;  // 问题id
+    string content = 2;     // 答案内容
+    int64 user_id = 3;      // 用户id
+}
+
+message CreateAnswerResponse {
+    int64 answer_id = 1;    //答案id
+}
+
+message Question {
+	string title = 1;     //标题
+	string content = 2;   //内容
+	string user_id = 3;   //作者
+	repeated int64 topic_ids = 4; //所属话题id
+	string summary = 5;     //摘要
+}
+
+message Answer {
+	int64 answer_id = 1;   //回答id
+	string content = 2;    //回答内容
+	int64 user_id = 3;     //回答作者
+}
+
+message GetTopStoryRequest {
+	repeated int64 question_id = 1; //一系列问题id
+}
+
+message GetTopStoryResponse {
+	repeated Question questions = 1;  //问题信息	
+	map<int64, Answer> top_answers = 2; //问题对应的回答
+}
+
+message GetAnswerByQuestionIdRequest {
+	int64 question_id = 1;          //问题id
+	int64 last_answer_id = 2;       //最后一个id
+	int64 limit = 3;                //加载多少项
+	enum SortType {
+		SortTypeUnknown = 0;
+		SortTypeTimeReverse = 1;   //按时间逆序排序
+		SortTypeRecommend = 2;     //按推荐进行排序
+	}
+	SortType sort_type = 4;        //排序规则
+}
+
+message GetAnswerByQuestionIdResponse {
+	Question question = 1;    //问题信息
+	repeated Answer answers = 2; //回答信息
+	bool has_more = 3;           //是否还有更多信息
+}
+
+message GetQuestionByUserIdRequest {
+	int64 user_id = 1;   //用户id
+}
+
+message GetQuestionByUserIdResponse {
+	Question question = 1;    //问题信息
+	bool has_more = 2;        //是否还有更多的问题
+}
+
+
+service QuestionService {
+  //创建问题
+  rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse){}
+  //创建回答
+  rpc CreateAnswer(CreateAnswerRequest) returns(CreateAnswerResponse) {}
+  //获取首页展示的优质问题
+  rpc GetTopStory(GetTopStoryRequest) returns(GetTopStoryResponse){}
+  //通过question_id获取回答列表
+  rpc GetAnswerByQuestionId(GetAnswerByQuestionIdRequest)returns(GetAnswerByQuestionIdResponse){}
+} 
+
